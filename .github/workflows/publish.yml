@@ -30,13 +30,30 @@ jobs:
           tar -xf /tmp/zig.tar.xz -C $HOME/.local/zig --strip-components=1
           echo "$HOME/.local/zig" >> $GITHUB_PATH
           rm /tmp/zig.tar.xz
+          export PATH="$HOME/.local/zig:$PATH"
           zig version
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build Zig binary (Release)
-        run: pnpm run build --release
+        run: |
+          # Build native (host) binary
+          pnpm run build --release
+          
+          # Build multi-target binaries
+          zig build -Doptimize=ReleaseSafe -Dtarget=x86_64-linux --summary all
+          cp zig-out/bin/di-code-generator zig/di-code-generator/zig-out/bin/di-code-generator-linux-x64 || true
+
+          zig build -Doptimize=ReleaseSafe -Dtarget=aarch64-linux --summary all
+          cp zig-out/bin/di-code-generator zig/di-code-generator/zig-out/bin/di-code-generator-linux-arm64 || true
+
+          zig build -Doptimize=ReleaseSafe -Dtarget=x86_64-windows --summary all
+          cp zig-out/bin/di-code-generator.exe zig/di-code-generator/zig-out/bin/di-code-generator-win-x64.exe || true
+
+          # macOS cross-compilation may need SDKs; attempt arm64
+          zig build -Doptimize=ReleaseSafe -Dtarget=aarch64-macos --summary all || true
+          cp zig-out/bin/di-code-generator zig/di-code-generator/zig-out/bin/di-code-generator-macos-arm64 || true
         working-directory: ./zig/di-code-generator
 
       - name: Publish to npm

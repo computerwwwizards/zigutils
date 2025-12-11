@@ -24,7 +24,7 @@
     "build": "zig build -Doptimize=ReleaseSafe",
     "build:release": "zig build -Doptimize=ReleaseSmall",
     "test": "zig build test",
-    "prepublishOnly": "npm run build:release"
+    "prepublishOnly": "pnpm run build:release"
   },
   "keywords": [
     "dependency-injection",

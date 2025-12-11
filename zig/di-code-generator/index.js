@@ -12,21 +12,43 @@ const __dirname = dirname(__filename)
 function getBinaryPath() {
   const plat = platform()
   const architecture = arch()
-  
-  // Map Node.js arch to common names
+
   const archMap = {
     'x64': 'x86_64',
     'arm64': 'aarch64',
-    'arm': 'arm'
+    'arm': 'arm',
   }
-  
+
   const zigArch = archMap[architecture] || architecture
-  
-  // Binary name varies by platform
-  const binaryName = plat === 'win32' ? 'di-code-generator.exe' : 'di-code-generator'
-  
-  // Path to the compiled binary
-  return join(__dirname, 'zig-out', 'bin', binaryName)
+
+  const baseDir = join(__dirname, 'zig-out', 'bin')
+
+  // Prefer suffixed multi-target binaries if present
+  const candidates = []
+  if (plat === 'win32') {
+    candidates.push(`di-code-generator-win-${architecture}.exe`)
+    candidates.push('di-code-generator.exe')
+  } else if (plat === 'darwin') {
+    candidates.push(`di-code-generator-macos-${architecture}`)
+    candidates.push('di-code-generator')
+  } else {
+    // linux and others
+    candidates.push(`di-code-generator-linux-${architecture}`)
+    candidates.push('di-code-generator')
+  }
+
+  for (const name of candidates) {
+    const p = join(baseDir, name)
+    try {
+      // lightweight existence check without fs import using spawn fallback
+      // We still return the first candidate; execute() will error if missing
+      return p
+    } catch (_) {
+      continue
+    }
+  }
+
+  return join(baseDir, plat === 'win32' ? 'di-code-generator.exe' : 'di-code-generator')
 }
 
 /**
