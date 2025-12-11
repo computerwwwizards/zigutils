@@ -18,7 +18,9 @@
     "index.js",
     "index.cjs",
     "bin/",
-    "zig-out/bin/"
+    "zig-out/bin/",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "zig build -Doptimize=ReleaseSafe",

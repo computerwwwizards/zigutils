@@ -167,6 +167,65 @@ npx di-code-gen --config ./services.config.json
 npx di-code-gen --config ./config.json --output ./src/di
 ```
 
+### Concrete Example (UserService)
+
+1) Create a config file `di.config.json`:
+
+```json
+{
+  "output": "./src/di",
+  "services": [
+    { "name": "userService", "interface": "IUserService" }
+  ]
+}
+```
+
+2) Run the generator:
+
+```bash
+npx di-code-gen --config ./di.config.json
+```
+
+3) Generated structure:
+
+```
+src/di/
+  userService/
+    types.ts
+    registerUserService.ts
+```
+
+4) `types.ts` (empty ServicesList with augmentation elsewhere):
+
+```ts
+import { PreProcessDependencyContainerWithUse } from '@computerwwwizards/dependency-injection'
+
+export interface ServicesList {}
+export type ContainerCtx = PreProcessDependencyContainerWithUse<ServicesList>
+```
+
+5) `registerUserService.ts` includes `IUserService`, default `register()` stub, a `mock()` helper, and augments `ServicesList`:
+
+```ts
+export interface IUserService {}
+
+export default function register(ctx: ContainerCtx) {
+  // TODO: register real implementation
+}
+
+export function mock(ctx: ContainerCtx) {
+  // TODO: register mock for tests
+}
+
+declare module './types' {
+  interface ServicesList {
+    userService: IUserService
+  }
+}
+
+register.mock = mock
+```
+
 ### Programmatic API
 
 **ESM:**
