@@ -1,0 +1,12 @@
+// zig.zon - Zig package manager manifest
+
+// This is a basic Zig package manifest file (zig.zon)
+// See: https://github.com/ziglang/zig/wiki/Package-Manager
+
+// Name and version of the app
+.{
+    .name = "my-app",
+    .version = "0.1.0",
+
+    .paths = .{ "build.zig", "build.zig.zon", "zig" },
+}

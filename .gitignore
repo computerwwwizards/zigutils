@@ -1,0 +1,6 @@
+node_modules
+.env
+target
+.pnpm-store
+zig-out
+.zig-cache
