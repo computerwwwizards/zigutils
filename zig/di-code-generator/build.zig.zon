@@ -1,0 +1,10 @@
+.{
+    .name = .di_code_generator,
+    .version = "0.0.1",
+    .fingerprint = 0x40795f05c11c5e32,
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}

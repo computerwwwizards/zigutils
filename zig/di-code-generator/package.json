@@ -1,0 +1,55 @@
+{
+  "name": "@computerwwwizards/di-code-generator",
+  "version": "0.1.0",
+  "description": "Code generator for @computerwwwizards/dependency-injection - generates TypeScript boilerplate for DI containers",
+  "type": "module",
+  "main": "./index.cjs",
+  "module": "./index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    }
+  },
+  "bin": {
+    "di-code-gen": "./bin/di-code-gen.js"
+  },
+  "files": [
+    "index.js",
+    "index.cjs",
+    "bin/",
+    "zig-out/bin/"
+  ],
+  "scripts": {
+    "build": "zig build -Doptimize=ReleaseSafe",
+    "build:release": "zig build -Doptimize=ReleaseSmall",
+    "test": "zig build test",
+    "prepublishOnly": "npm run build:release"
+  },
+  "keywords": [
+    "dependency-injection",
+    "code-generator",
+    "typescript",
+    "ioc",
+    "di"
+  ],
+  "author": "Computer Wizards",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/computerwwwizards/di-code-generator.git",
+    "directory": "zig/di-code-generator"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}

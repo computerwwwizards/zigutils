@@ -1,0 +1,21 @@
+{
+  "output": "./example_output",
+  "services": [
+    {
+      "name": "userService",
+      "interface": "IUserService"
+    },
+    {
+      "name": "authProvider",
+      "interface": "IAuthProvider"
+    },
+    {
+      "name": "apiClient",
+      "interface": "IApiClient"
+    },
+    {
+      "name": "databaseConnection",
+      "interface": "IDatabaseConnection"
+    }
+  ]
+}
