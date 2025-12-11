@@ -56,11 +56,11 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const []const u8) !CliArg
                 return error.MissingServiceName;
             }
             const service_spec = args[i];
-            
+
             // Parse serviceName or serviceName:InterfaceName
             var name: []const u8 = undefined;
             var interface: []const u8 = undefined;
-            
+
             if (std.mem.indexOfScalar(u8, service_spec, ':')) |colon_idx| {
                 // Custom interface provided
                 name = try allocator.dupe(u8, service_spec[0..colon_idx]);
@@ -72,7 +72,7 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const []const u8) !CliArg
                 defer allocator.free(pascal);
                 interface = try std.fmt.allocPrint(allocator, "I{s}", .{pascal});
             }
-            
+
             try service_list.append(allocator, ServiceDef{
                 .name = name,
                 .interface = interface,
