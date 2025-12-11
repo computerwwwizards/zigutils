@@ -1,20 +1,20 @@
 import type { PreProcessDependencyContainerWithUse } from '@computerwwwizards/dependency-injection'
 import { type ContainerCtx } from './types'
 
-export interface IApiClient {
+export interface IAuthProvider {
   // TODO: Define service interface
 }
 
 declare module './types' {
   interface ServicesList {
-    apiClient: IApiClient
+    auth_service: IAuthProvider
   }
 }
 
-export default function registerApiClient(
+export default function registerAuthService(
   container: ContainerCtx
 ) {
-  container.bind('apiClient', {
+  container.bind('auth_service', {
     // TODO: Implement service registration
   })
 }
@@ -22,9 +22,9 @@ export default function registerApiClient(
 export function mock(
   container: ContainerCtx
 ) {
-  container.bind('apiClient', {
+  container.bind('auth_service', {
     // TODO: Implement mock service registration
   })
 }
 
-registerApiClient.mock = mock
+registerAuthService.mock = mock

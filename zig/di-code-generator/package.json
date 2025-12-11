@@ -1,6 +1,6 @@
 {
   "name": "@computerwwwizards/di-code-generator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Code generator for @computerwwwizards/dependency-injection - generates TypeScript boilerplate for DI containers",
   "type": "module",
   "main": "./index.cjs",

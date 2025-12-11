@@ -1,5 +1,6 @@
 const std = @import("std");
 const common = @import("common.zig");
+const name_utils = @import("name_utils.zig");
 
 const ServiceDef = common.ServiceDef;
 
@@ -9,23 +10,31 @@ pub const CliArgs = struct {
     config_path: ?[]const u8 = null,
     /// Output directory for generated files
     output_dir: ?[]const u8 = null,
+    /// Services defined via CLI (optional, can be empty)
+    services: []ServiceDef = &[_]ServiceDef{},
 };
 
 /// Parse command line arguments
 ///
 /// Expected format:
-///   di-code-gen [--config <path>] [--output <dir>]
+///   di-code-gen [--config <path>] [--output <dir>] [--service <name>[:<interface>] ...]
 ///
-/// Both arguments are optional. If no config is provided, looks for default config in cwd.
+/// Service format:
+///   --service userService           (interface auto-inferred as IUserService)
+///   --service user_service:IUser    (custom interface)
+///
+/// Arguments are optional. If no config is provided, looks for default config in cwd.
 ///
 /// Arguments:
 ///   - allocator: Memory allocator for storing argument strings
 ///   - args: Raw command line arguments (argv)
 ///
 /// Returns:
-///   - CliArgs with parsed configuration
+///   - CliArgs with parsed configuration and services
 pub fn parseArgs(allocator: std.mem.Allocator, args: []const []const u8) !CliArgs {
     var parsed = CliArgs{};
+    var service_list = try std.ArrayList(ServiceDef).initCapacity(allocator, 0);
+    defer service_list.deinit(allocator);
 
     var i: usize = 1; // Skip program name
     while (i < args.len) : (i += 1) {
@@ -41,7 +50,38 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const []const u8) !CliArg
                 return error.MissingOutputPath;
             }
             parsed.output_dir = try allocator.dupe(u8, args[i]);
+        } else if (std.mem.eql(u8, args[i], "--service")) {
+            i += 1;
+            if (i >= args.len) {
+                return error.MissingServiceName;
+            }
+            const service_spec = args[i];
+            
+            // Parse serviceName or serviceName:InterfaceName
+            var name: []const u8 = undefined;
+            var interface: []const u8 = undefined;
+            
+            if (std.mem.indexOfScalar(u8, service_spec, ':')) |colon_idx| {
+                // Custom interface provided
+                name = try allocator.dupe(u8, service_spec[0..colon_idx]);
+                interface = try allocator.dupe(u8, service_spec[colon_idx + 1 ..]);
+            } else {
+                // Auto-infer interface: serviceName -> IServiceName (PascalCase)
+                name = try allocator.dupe(u8, service_spec);
+                const pascal = try name_utils.toPascalCase(allocator, service_spec);
+                defer allocator.free(pascal);
+                interface = try std.fmt.allocPrint(allocator, "I{s}", .{pascal});
+            }
+            
+            try service_list.append(allocator, ServiceDef{
+                .name = name,
+                .interface = interface,
+            });
         }
+    }
+
+    if (service_list.items.len > 0) {
+        parsed.services = try allocator.dupe(ServiceDef, service_list.items);
     }
 
     return parsed;

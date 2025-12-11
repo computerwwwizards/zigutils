@@ -167,6 +167,32 @@ npx di-code-gen --config ./services.config.json
 npx di-code-gen --config ./config.json --output ./src/di
 ```
 
+### Quick CLI Generation (Auto-inferred Interface)
+
+Generate a service directly via CLI without a config file. The interface name is automatically inferred from the service name (e.g., `userService` → `IUserService`):
+
+```bash
+# Single service
+npx di-code-gen --service userService --output ./src/di
+
+# Multiple services
+npx di-code-gen --service userService --service paymentGateway --output ./src/di
+
+# Custom interface name (optional; defaults to I + PascalCase of service name)
+npx di-code-gen --service userService:IUserAuthService --output ./src/di
+
+# Combination: CLI services override config
+npx di-code-gen --config config.json --service customService --output ./src/di
+```
+
+**Auto-inference examples:**
+- `userService` → `IUserService`
+- `paymentGateway` → `IPaymentGateway`
+- `auth_service` → `IAuthService`
+- `DBConnection` → `IDbconnection`
+
+When `--service` is provided, CLI services take precedence over config file services.
+
 ### Concrete Example (UserService)
 
 1) Create a config file `di.config.json`:

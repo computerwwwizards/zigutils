@@ -80,7 +80,7 @@ pub fn main() !void {
     // Parse CLI arguments (all optional)
     const cli_args = di_gen.cli.parseArgs(allocator, args) catch |err| {
         std.debug.print("Error parsing arguments: {}\n", .{err});
-        std.debug.print("Usage: di-code-gen [--config <path>] [--output <dir>]\n", .{});
+        std.debug.print("Usage: di-code-gen [--config <path>] [--output <dir>] [--service <name>[:<interface>] ...]\n", .{});
         return err;
     };
     // Note: defer freeing cli_args is skipped to avoid segfault during cleanup
@@ -105,10 +105,16 @@ pub fn main() !void {
         }
     }
 
-    // If no config loaded and no CLI output dir, use current directory as default
-    // Don't error - just continue with empty services
+    // Merge config and CLI services: CLI takes precedence
+    var final_services: []const di_gen.common.ServiceDef = &[_]di_gen.common.ServiceDef{};
+    if (cli_args.services.len > 0) {
+        final_services = cli_args.services;
+    } else if (config_loaded) {
+        final_services = config.services;
+    }
+
+    // Determine output directory: CLI takes precedence
     const output_dir = cli_args.output_dir orelse (if (config_loaded) config.output else ".");
-    const services = if (config_loaded) config.services else &[_]di_gen.common.ServiceDef{};
 
     defer if (config_loaded) {
         allocator.free(config.output);
@@ -119,15 +125,24 @@ pub fn main() !void {
         allocator.free(config.services);
     };
 
+    // Also free CLI services if they were created
+    defer if (cli_args.services.len > 0) {
+        for (cli_args.services) |service| {
+            allocator.free(service.name);
+            allocator.free(service.interface);
+        }
+        allocator.free(cli_args.services);
+    };
+
     std.debug.print("DI Code Generator\n", .{});
     std.debug.print("=================\n\n", .{});
     if (config_path) |path| {
         std.debug.print("Config: {s}\n", .{path});
     }
     std.debug.print("Output: {s}\n", .{output_dir});
-    std.debug.print("Services: {}\n\n", .{services.len});
+    std.debug.print("Services: {}\n\n", .{final_services.len});
 
-    if (services.len == 0) {
+    if (final_services.len == 0) {
         std.debug.print("Warning: No services to generate\n", .{});
         return;
     }
@@ -135,7 +150,7 @@ pub fn main() !void {
     // Run the orchestrator
     const gen_config = di_gen.orchestrator.GeneratorConfig{
         .output_dir = output_dir,
-        .services = services,
+        .services = final_services,
     };
 
     try di_gen.orchestrator.generateAll(allocator, gen_config);
