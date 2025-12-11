@@ -2,11 +2,6 @@ name: Publish to npm
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Package version to publish (e.g., 1.0.0)"
-        required: true
-        type: string
 
 jobs:
   publish:
@@ -20,14 +15,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: latest
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "pnpm"
 
       - name: Setup Zig
@@ -46,16 +41,10 @@ jobs:
         run: pnpm run build --release
         working-directory: ./zig/di-code-generator
 
-      - name: Update package version
-        run: |
-          npm version ${{ inputs.version }} --no-git-tag-version
-        working-directory: ./zig/di-code-generator
-
       - name: Publish to npm
-        run: pnpm publish --access public
-        working-directory: ./zig/di-code-generator
+        run: pnpm publish --recursive --access public
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Success notification
-        run: echo "✅ Published @computerwwwizards/di-code-generator@${{ inputs.version }} to npm"
+        run: echo "✅ Published packages to npm"
