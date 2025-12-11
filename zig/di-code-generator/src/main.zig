@@ -1,6 +1,65 @@
 const std = @import("std");
 const di_gen = @import("di-code-generator");
 
+const HELP_TEXT =
+    \\DI Code Generator v0.1.0
+    \\Code generator for @computerwwwizards/dependency-injection
+    \\
+    \\USAGE:
+    \\  di-code-gen [OPTIONS]
+    \\
+    \\OPTIONS:
+    \\  --config <PATH>   Path to JSON configuration file
+    \\                    Auto-discovers: di.config.json, config.json, .di.config.json
+    \\  --output <DIR>    Output directory for generated files (overrides config)
+    \\  --help, -h        Show this help message
+    \\
+    \\CONFIGURATION:
+    \\  Create a config.json (or di.config.json) in your project root:
+    \\
+    \\  {
+    \\    "output": "./src/di",
+    \\    "services": [
+    \\      {
+    \\        "name": "userService",
+    \\        "interface": "IUserService"
+    \\      },
+    \\      {
+    \\        "name": "authProvider",
+    \\        "interface": "IAuthProvider"
+    \\      }
+    \\    ]
+    \\  }
+    \\
+    \\EXAMPLES:
+    \\
+    \\  Auto-discover config.json in current directory:
+    \\    $ di-code-gen
+    \\
+    \\  Specify config file explicitly:
+    \\    $ di-code-gen --config ./services.config.json
+    \\
+    \\  Override output directory:
+    \\    $ di-code-gen --config config.json --output ./src/di
+    \\
+    \\  Custom output with auto-discovered config:
+    \\    $ di-code-gen --output ./generated
+    \\
+    \\GENERATED STRUCTURE:
+    \\  For each service, creates a directory with:
+    \\    - types.ts                (ServicesList interface)
+    \\    - registerServiceName.ts  (registration + mock functions)
+    \\
+    \\  Example output:
+    \\    src/di/
+    \\      userService/
+    \\        types.ts
+    \\        registerUserService.ts
+    \\      authProvider/
+    \\        types.ts
+    \\        registerAuthProvider.ts
+;
+
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
@@ -9,6 +68,14 @@ pub fn main() !void {
     // Get command line arguments
     const args = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, args);
+
+    // Check for help flag
+    for (args[1..]) |arg| {
+        if (std.mem.eql(u8, arg, "--help") or std.mem.eql(u8, arg, "-h")) {
+            std.debug.print("{s}\n", .{HELP_TEXT});
+            return;
+        }
+    }
 
     // Parse CLI arguments (all optional)
     const cli_args = di_gen.cli.parseArgs(allocator, args) catch |err| {

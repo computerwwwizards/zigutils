@@ -36,13 +36,13 @@ fn generateServiceFileTask(ctx: *const ServiceGenerationTask) !void {
 }
 
 /// Orchestrates the code generation process
-/// 
+///
 /// For each service, creates a subdirectory and generates:
 /// 1. types.ts (in service subdirectory)
 /// 2. registerServiceX.ts (in service subdirectory)
-/// 
+///
 /// Files are generated in parallel for efficiency.
-/// 
+///
 /// Arguments:
 ///   - allocator: Memory allocator for file operations and thread management
 ///   - config: GeneratorConfig with services and output directory

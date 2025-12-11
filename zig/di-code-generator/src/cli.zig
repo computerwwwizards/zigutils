@@ -12,7 +12,7 @@ pub const CliArgs = struct {
 };
 
 /// Parse command line arguments
-/// 
+///
 /// Expected format:
 ///   di-code-gen [--config <path>] [--output <dir>]
 ///
@@ -57,7 +57,7 @@ pub const JsonConfig = struct {
 /// Returns null if no default config found
 pub fn findDefaultConfig(allocator: std.mem.Allocator) ?[]const u8 {
     const default_names = [_][]const u8{ "di.config.json", "config.json", ".di.config.json" };
-    
+
     for (default_names) |name| {
         if (std.fs.cwd().openFile(name, .{})) |file| {
             file.close();
@@ -67,7 +67,7 @@ pub fn findDefaultConfig(allocator: std.mem.Allocator) ?[]const u8 {
             continue;
         }
     }
-    
+
     return null;
 }
 

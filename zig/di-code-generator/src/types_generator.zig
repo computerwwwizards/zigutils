@@ -12,7 +12,7 @@ pub const TypesGeneratorOptions = struct {
 };
 
 /// Generates a types.ts file containing ServicesList interface and ContainerCtx type alias
-/// 
+///
 /// Arguments:
 ///   - allocator: Memory allocator for string building
 ///   - output_path: File path where types.ts will be written
